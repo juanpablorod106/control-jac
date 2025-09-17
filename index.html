@@ -102,16 +102,16 @@
             
             <button class="boton boton-primario" onclick="registrarUsuario()">Registrar Usuario</button>
         </div>
-
+        
         <!-- Vista de Ingreso de Equipo -->
         <div id="vista-qrpage" class="view">
             <div class="app-bar">
                 <h1>Ingreso de equipo</h1>
             </div>
-            
             <h2 class="titulo">Ingrese los datos de su recorrido</h2>
             
-            <button class="boton boton-secundario" onclick="escanearQR()">Escanear QR del equipo</button>
+            <div id="qr-reader" style="width: 300px;"></div>
+            <button class="boton boton-secundario" onclick="iniciarEscaneo()">Escanear QR del equipo</button>
             
             <div class="seccion">
                 <div class="form-group">
@@ -182,5 +182,6 @@
         </div>
     </div>
     <script src="script.js"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </body>
 </html>

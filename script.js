@@ -1,3 +1,4 @@
+src="https://unpkg.com/html5-qrcode"
 // Configuración de Supabase
         const supabaseUrl = 'https://rpvnrwldekdzlzwkerlx.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwdm5yd2xkZWtkemx6d2tlcmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMjA0ODcsImV4cCI6MjA3MjY5NjQ4N30.ByDuXBxKnCSeIn-1Bo4dap-sEjkdN61GQTVx9Vnl_yM';
@@ -264,7 +265,30 @@
             // Buscar automáticamente el equipo después de escanear
             await buscarEquipo();
         }
-        
+
+        async function iniciarEscaneo() {
+        const qrReader = new Html5Qrcode("qr-reader");
+
+        const config = { fps: 10, qrbox: 250 };
+
+        qrReader.start(
+            { facingMode: "environment" }, // cámara trasera
+            config,
+            async (decodedText, decodedResult) => {
+                // Detener escaneo al leer el QR
+                await qrReader.stop();
+                document.getElementById('equipo').value = decodedText;
+
+                // Buscar equipo en Supabase
+                await buscarEquipo();
+            },
+            errorMessage => {
+                console.warn(`QR error: ${errorMessage}`);
+            }
+        ).catch(err => {
+            console.error("Error al iniciar escaneo:", err);
+        });
+        } 
         async function obtenerIdUsuarioPorUsername(username) {
             try {
                 const { data, error } = await supabase
