@@ -1,0 +1,22 @@
+{
+  "name": "Control Jack - NABEP",
+  "short_name": "Control Jack",
+  "description": "Sistema de control de equipos sobre ruedas de NABEP",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0D47A1",
+  "theme_color": "#0D47A1",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

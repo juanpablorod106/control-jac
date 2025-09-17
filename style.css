@@ -349,3 +349,7 @@
                 padding: 10px;
             }
         }
+        #install-button {
+            margin-top: 15px;
+            display: none; /* Oculto por defecto */
+        }

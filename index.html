@@ -8,7 +8,19 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="./Assets/logo.png" type="image/png">
-        
+    <!-- Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Meta tags para PWA -->
+    <meta name="theme-color" content="#0D47A1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Control Jack">
+
+    <!-- Icons para diferentes dispositivos -->
+    <link rel="icon" type="image/png" href="icon-192x192.png">
+    <link rel="apple-touch-icon" href="icon-192x192.png">
+
 </head>
 <body>
     <div class="app-container">
@@ -30,6 +42,7 @@
             <button class="boton boton-primario" onclick="cambiarVista('inicio_de_sesion')">Iniciar sesión</button>
             <button class="boton boton-secundario" onclick="cambiarVista('registrarse')">Crear cuenta</button>
             <button class="boton boton-exportar" onclick="exportarKilometraje()">Exportar Excel</button>
+            <button id="install-button" style="display: none;" class="boton boton-primario">Instalar App</button>
         </div>
 
         <!-- Vista de Inicio de Sesión -->

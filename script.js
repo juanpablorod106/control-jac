@@ -484,3 +484,52 @@
                 usuarioActual = usuarioGuardado;
             }
         });
+
+        // Registrar Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('SW registrado: ', registration);
+      })
+      .catch(registrationError => {
+        console.log('Error registrando SW: ', registrationError);
+      });
+  });
+}
+
+// Detectar si la PWA está instalada
+window.addEventListener('appinstalled', () => {
+  console.log('La aplicación fue instalada con éxito');
+});
+
+// Mostrar el botón de instalación
+let deferredPrompt;
+const installButton = document.getElementById('install-button');
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Prevenir que el mini-infobar aparezca en mobile
+  e.preventDefault();
+  // Guardar el evento para que pueda ser activado después
+  deferredPrompt = e;
+  // Mostrar el botón de instalación
+  if (installButton) {
+    installButton.style.display = 'block';
+    
+    installButton.addEventListener('click', () => {
+      // Ocultar el botón
+      installButton.style.display = 'none';
+      // Mostrar el prompt de instalación
+      deferredPrompt.prompt();
+      // Esperar a que el usuario responda al prompt
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('Usuario aceptó instalar la PWA');
+        } else {
+          console.log('Usuario rechazó instalar la PWA');
+        }
+        deferredPrompt = null;
+      });
+    });
+  }
+});
