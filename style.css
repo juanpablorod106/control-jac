@@ -1,0 +1,351 @@
+:root {
+            --color-primario: #0D47A1;
+            --color-secundario: #1976D2;
+            --color-terciario: #BBDEFB;
+            --color-texto-oscuro: #212121;
+            --color-texto-claro: #FFFFFF;
+            --color-fondo: #F5F5F5;
+            --color-boton-exportar: #388E3C;
+            --color-borde: #DDDDDD;
+            --sombra-suave: 0 2px 10px rgba(0, 0, 0, 0.1);
+            --radio-borde: 8px;
+            
+            /* Nuevas variables para modo oscuro */
+            --color-fondo-oscuro: #121212;
+            --color-superficie-oscuro: #1E1E1E;
+            --color-texto-oscuro-claro: #E0E0E0;
+            --color-borde-oscuro: #424242;
+        }
+
+        .modo-oscuro {
+            --color-fondo: var(--color-fondo-oscuro);
+            --color-texto-oscuro: var(--color-texto-oscuro-claro);
+            --color-borde: var(--color-borde-oscuro);
+            background-color: var(--color-fondo-oscuro);
+            color: var(--color-texto-oscuro-claro);
+        }
+
+        .modo-oscuro .view {
+            background-color: var(--color-superficie-oscuro);
+        }
+
+        .modo-oscuro .campo {
+            background-color: #2D2D2D;
+            color: var(--color-texto-oscuro-claro);
+            border-color: var(--color-borde-oscuro);
+        }
+
+        .modo-oscuro .boton-volver {
+            background-color: #424242;
+            color: var(--color-texto-oscuro-claro);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body {
+            background-color: var(--color-fondo);
+            color: var(--color-texto-oscuro);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .app-bar {
+            background-color: var(--color-primario);
+            color: var(--color-texto-claro);
+            padding: 15px 20px;
+            border-radius: var(--radio-borde);
+            margin-bottom: 20px;
+            box-shadow: var(--sombra-suave);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .app-bar h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 20px;
+            background-color: white;
+            border-radius: var(--radio-borde);
+            box-shadow: var(--sombra-suave);
+            margin-bottom: 20px;
+        }
+
+        .view.active {
+            display: flex;
+        }
+
+        .logo {
+            width: 300px;
+            height: 300px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .titulo {
+            font-size: 30px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .subtitulo {
+            font-size: 16px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .seccion {
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .seccion-titulo {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--color-primario);
+        }
+
+        .form-group {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .campo {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--color-borde);
+            border-radius: var(--radio-borde);
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+
+        .campo:focus {
+            outline: none;
+            border-color: var(--color-secundario);
+        }
+
+        .campo:disabled {
+            background-color: #f0f0f0;
+            color: #888;
+        }
+
+        .modo-oscuro .campo:disabled {
+            background-color: #3D3D3D;
+            color: #A0A0A0;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .boton {
+            padding: 15px 25px;
+            border-radius: var(--radio-borde);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            width: 250px;
+            height: 50px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .boton-primario {
+            background-color: var(--color-primario);
+            color: var(--color-texto-claro);
+        }
+
+        .boton-primario:hover {
+            background-color: var(--color-secundario);
+        }
+
+        .boton-secundario {
+            background-color: transparent;
+            border: 2px solid var(--color-primario);
+            color: var(--color-primario);
+        }
+
+        .boton-secundario:hover {
+            background-color: var(--color-terciario);
+        }
+
+        .boton-exportar {
+            background-color: var(--color-boton-exportar);
+            color: var(--color-texto-claro);
+        }
+
+        .boton-exportar:hover {
+            background-color: #2E7D32;
+        }
+
+        .boton-volver {
+            background-color: #E0E0E0;
+            color: var(--color-texto-oscuro);
+            margin-bottom: 20px;
+        }
+
+        .boton-volver:hover {
+            background-color: #D0D0D0;
+        }
+
+        .modo-oscuro .boton-volver:hover {
+            background-color: #4D4D4D;
+        }
+
+        .mensaje-error {
+            color: #D32F2F;
+            background-color: #FFEBEE;
+            padding: 10px;
+            border-radius: var(--radio-borde);
+            margin: 10px 0;
+            display: none;
+        }
+
+        .mensaje-exito {
+            color: #388E3C;
+            background-color: #E8F5E9;
+            padding: 10px;
+            border-radius: var(--radio-borde);
+            margin: 10px 0;
+            display: none;
+        }
+
+        .modo-oscuro .mensaje-error {
+            color: #F44336;
+            background-color: #311B1B;
+        }
+
+        .modo-oscuro .mensaje-exito {
+            color: #4CAF50;
+            background-color: #1B311B;
+        }
+
+        .interruptor-modo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .interruptor {
+            position: relative;
+            width: 50px;
+            height: 24px;
+            background-color: #ccc;
+            border-radius: 34px;
+            transition: background-color 0.3s;
+        }
+
+        .interruptor.activo {
+            background-color: var(--color-primario);
+        }
+
+        .interruptor::before {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        .interruptor.activo::before {
+            transform: translateX(26px);
+        }
+
+        .cargando {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--color-primario);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .app-container {
+                padding: 10px;
+            }
+            
+            .logo {
+                width: 200px;
+                height: 200px;
+            }
+            
+            .titulo {
+                font-size: 24px;
+            }
+            
+            .boton {
+                width: 100%;
+                max-width: 280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .app-bar h1 {
+                font-size: 1.2rem;
+            }
+            
+            .titulo {
+                font-size: 20px;
+            }
+            
+            .subtitulo {
+                font-size: 14px;
+            }
+            
+            .campo {
+                padding: 10px;
+            }
+        }

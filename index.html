@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Jack - NABEP</title>
+    <!-- Incluir la biblioteca de Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="style.css">
+        
+</head>
+<body>
+    <div class="app-container">
+        <!-- Barra de navegación -->
+        <div class="app-bar">
+            <h1 id="titulo-vista">Inicio</h1>
+            <div class="interruptor-modo" onclick="alternarModoOscuro()">
+                <span id="texto-modo">Modo oscuro</span>
+                <div class="interruptor" id="interruptor-modo"></div>
+            </div>
+        </div>
+
+        <!-- Vista de Inicio -->
+        <div id="vista-inicio" class="view active">
+            <img src="https://media.licdn.com/dms/image/v2/D4E0BAQFtbu5ZTH9NfA/company-logo_200_200/company-logo_200_200/0/1720369998730?e=2147483647&v=beta&t=pLJAW_0ZdoIuWlQX3rpymhptn6yEsXVpCFCHGZi8VME" alt="Logo NABEP" class="logo">
+            <h2 class="titulo">Bienvenido</h2>
+            <p class="subtitulo">Control de los equipos sobre ruedas de NABEP.</p>
+            
+            <button class="boton boton-primario" onclick="cambiarVista('inicio_de_sesion')">Iniciar sesión</button>
+            <button class="boton boton-secundario" onclick="cambiarVista('registrarse')">Crear cuenta</button>
+            <button class="boton boton-exportar" onclick="exportarKilometraje()">Exportar Excel</button>
+        </div>
+
+        <!-- Vista de Inicio de Sesión -->
+        <div id="vista-inicio_de_sesion" class="view">
+            <button class="boton boton-volver" onclick="cambiarVista('inicio')">Volver al inicio</button>
+            <h2 class="titulo">Ingrese sus datos</h2>
+            
+            <div id="mensaje-error-login" class="mensaje-error">
+                Usuario o contraseña incorrectos
+            </div>
+            
+            <div class="form-group">
+                <label for="usuario-login">Usuario</label>
+                <input type="text" id="usuario-login" class="campo" placeholder="Ingrese su usuario">
+            </div>
+            
+            <div class="form-group">
+                <label for="contrasena-login">Contraseña</label>
+                <input type="password" id="contrasena-login" class="campo" placeholder="Ingrese su contraseña">
+            </div>
+            
+            <button class="boton boton-primario" onclick="verificarLogin()">Iniciar sesión</button>
+        </div>
+
+        <!-- Vista de Registro -->
+        <div id="vista-registrarse" class="view">
+            <button class="boton boton-volver" onclick="cambiarVista('inicio')">Volver al inicio</button>
+            <h2 class="titulo">Ingrese sus datos</h2>
+            
+            <div id="mensaje-error-registro" class="mensaje-error"></div>
+            <div id="mensaje-exito-registro" class="mensaje-exito"></div>
+            
+            <div class="form-group">
+                <label for="usuario-registro">Usuario</label>
+                <input type="text" id="usuario-registro" class="campo" placeholder="Ingrese su nombre de usuario">
+            </div>
+            
+            <div class="form-group">
+                <label for="contrasena-registro">Contraseña</label>
+                <input type="password" id="contrasena-registro" class="campo" placeholder="Ingrese su contraseña">
+            </div>
+            
+            <div class="form-group">
+                <label for="nombre">Nombre del trabajador</label>
+                <input type="text" id="nombre" class="campo" placeholder="Ingrese su nombre">
+            </div>
+            
+            <div class="form-group">
+                <label for="apellido">Apellido del trabajador</label>
+                <input type="text" id="apellido" class="campo" placeholder="Ingrese su apellido">
+            </div>
+            
+            <div class="form-group">
+                <label for="cedula">ID/Cédula</label>
+                <input type="text" id="cedula" class="campo" placeholder="Ingrese su cédula de identidad">
+            </div>
+            
+            <button class="boton boton-primario" onclick="registrarUsuario()">Registrar Usuario</button>
+        </div>
+
+        <!-- Vista de Ingreso de Equipo -->
+        <div id="vista-qrpage" class="view">
+            <div class="app-bar">
+                <h1>Ingreso de equipo</h1>
+            </div>
+            
+            <h2 class="titulo">Ingrese los datos de su recorrido</h2>
+            
+            <button class="boton boton-secundario" onclick="escanearQR()">Escanear QR del equipo</button>
+            
+            <div class="seccion">
+                <div class="form-group">
+                    <label for="equipo">Identificación del equipo</label>
+                    <input type="text" id="equipo" class="campo" placeholder="Ingrese la identificación del equipo a circular el día de hoy" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="modelo">Modelo del equipo</label>
+                    <input type="text" id="modelo" class="campo" placeholder="Ingrese el modelo del equipo a circular el día de hoy" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="placa">Placa del equipo</label>
+                    <input type="text" id="placa" class="campo" placeholder="Ingrese la placa del equipo a circular el día de hoy" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tasa">Tasa en dólares</label>
+                    <input type="number" step="0.01" id="tasa" class="campo" placeholder="Ingrese la tasa del litro de gasolina en Bs.D al día">
+                </div>
+                
+                <div class="form-group">
+                    <label for="litros">Ingrese el número de litros ingresados al surtir gasolina</label>
+                    <input type="number" step="0.01" id="litros" class="campo" placeholder="Ingresar el número de litros">
+                </div>
+            </div>
+            
+            <div class="seccion">
+                <h3 class="seccion-titulo">Kilometraje de los equipos</h3>
+                
+                <div class="form-group">
+                    <label for="km-inicial">Ingrese el kilometraje inicial del equipo</label>
+                    <input type="number" step="0.01" id="km-inicial" class="campo" placeholder="Ingrese el kilometraje inicial del equipo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="km-intermedio">Ingrese el kilometraje intermedio del equipo</label>
+                    <input type="number" step="0.01" id="km-intermedio" class="campo" placeholder="Ingrese el kilometraje intermedio del equipo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="km-final">Ingrese el kilometraje final del equipo</label>
+                    <input type="number" step="0.01" id="km-final" class="campo" placeholder="Ingrese el kilometraje al final del día del equipo">
+                </div>
+            </div>
+            
+            <div class="seccion">
+                <h3 class="seccion-titulo">Litraje de los equipos</h3>
+                
+                <div class="form-group">
+                    <label for="lt-inicial">Ingrese la gasolina inicial del equipo</label>
+                    <input type="number" step="0.01" id="lt-inicial" class="campo" placeholder="Ingrese la gasolina al iniciar el día del equipo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="lt-intermedio">Ingrese la gasolina intermedia del equipo</label>
+                    <input type="number" step="0.01" id="lt-intermedio" class="campo" placeholder="Ingrese la gasolina a la mitad del día del equipo">
+                </div>
+                
+                <div class="form-group">
+                    <label for="lt-final">Ingrese la gasolina final del equipo</label>
+                    <input type="number" step="0.01" id="lt-final" class="campo" placeholder="Ingrese la gasolina al final del día del equipo">
+                </div>
+            </div>
+            
+            <button class="boton boton-primario" onclick="registrarKilometraje()">Registrar en el sistema</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
