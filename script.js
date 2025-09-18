@@ -366,9 +366,9 @@ src="https://unpkg.com/html5-qrcode"
             const kmFinalVal = convertirANumerico(kmFinal);
             const tasaVal = convertirANumerico(tasa);
             const totalUsdVal = convertirANumerico(litros);
-            const ltsInicialVal = convertirANumerico(ltInicial);
-            const ltsIntermedioVal = convertirANumerico(ltIntermedio);
-            const ltsFinalVal = convertirANumerico(ltFinal);
+            const ltsInicialVal = ltInicial;
+            const ltsIntermedioVal = ltIntermedio;
+            const ltsFinalVal = ltFinal;
             const totalBsdVal = totalUsdVal * tasaVal;
             
             // Obtener fecha y hora actual

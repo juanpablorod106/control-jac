@@ -8,6 +8,7 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="./Assets/logo.png" type="image/png">
+
     <!-- Manifest -->
     <link rel="manifest" href="manifest.json">
 
@@ -167,19 +168,53 @@
                 
                 <div class="form-group">
                     <label for="lt-inicial">Ingrese la gasolina inicial del equipo</label>
-                    <input type="number" step="0.01" id="lt-inicial" class="campo" placeholder="Ingrese la gasolina al iniciar el día del equipo">
+                    <select id="lt-inicial" class="campo">
+                        <option value="">Seleccione una opción</option>
+                        <option value="1">1</option>
+                        <option value="7/8">7/8</option>
+                        <option value="3/4">3/4</option>
+                        <option value="5/8">5/8</option>
+                        <option value="1/2">1/2</option>
+                        <option value="3/8">3/8</option>
+                        <option value="1/4">1/4</option>
+                        <option value="1/8">1/8</option>
+                        <option value="1/16">1/16</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="lt-intermedio">Ingrese la gasolina intermedia del equipo</label>
-                    <input type="number" step="0.01" id="lt-intermedio" class="campo" placeholder="Ingrese la gasolina a la mitad del día del equipo">
+                    <select id="lt-intermedio" class="campo">
+                        <option value="">Seleccione una opción</option>
+                        <option value="1">1</option>
+                        <option value="7/8">7/8</option>
+                        <option value="3/4">3/4</option>
+                        <option value="5/8">5/8</option>
+                        <option value="1/2">1/2</option>
+                        <option value="3/8">3/8</option>
+                        <option value="1/4">1/4</option>
+                        <option value="1/8">1/8</option>
+                        <option value="1/16">1/16</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="lt-final">Ingrese la gasolina final del equipo</label>
-                    <input type="number" step="0.01" id="lt-final" class="campo" placeholder="Ingrese la gasolina al final del día del equipo">
+                    <select id="lt-final" class="campo">
+                        <option value="">Seleccione una opción</option>
+                        <option value="1">1</option>
+                        <option value="7/8">7/8</option>
+                        <option value="3/4">3/4</option>
+                        <option value="5/8">5/8</option>
+                        <option value="1/2">1/2</option>
+                        <option value="3/8">3/8</option>
+                        <option value="1/4">1/4</option>
+                        <option value="1/8">1/8</option>
+                        <option value="1/16">1/16</option>
+                    </select>
                 </div>
             </div>
+
             
             <button class="boton boton-primario" onclick="registrarKilometraje()">Registrar en el sistema</button>
         </div>
