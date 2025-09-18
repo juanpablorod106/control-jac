@@ -427,6 +427,10 @@ src="https://unpkg.com/html5-qrcode"
             }
         }
         
+        async function salir_form() {
+            cambiarVista('inicio_de_sesion');
+        }
+
         async function exportarKilometraje() {
             try {
                 // Obtener datos de registros
@@ -473,23 +477,41 @@ src="https://unpkg.com/html5-qrcode"
                     };
                 });
                 
-                // Crear y descargar el archivo CSV (en un entorno real podrías generar Excel)
-                const csvContent = "data:text/csv;charset=utf-8," 
-                    + Object.keys(datosCombinados[0]).join(",") + "\n"
-                    + datosCombinados.map(row => 
-                        Object.values(row).map(value => 
-                            typeof value === 'string' ? `"${value}"` : value
-                        ).join(",")
-                    ).join("\n");
+                                // Crear libro y hoja de Excel
+                const XLSX = window.XLSX; // Asegúrate de tener la librería cargada en tu HTML
+                const workbook = XLSX.utils.book_new();
+                const worksheetData = [
+                    Object.keys(datosCombinados[0]),
+                    ...datosCombinados.map(obj => Object.values(obj))
+                ];
+                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
                 
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "kilometraje_nabep.csv");
-                document.body.appendChild(link);
+                // Aplicar bordes negros a cada celda
+                const range = XLSX.utils.decode_range(worksheet['!ref']);
+                for (let R = range.s.r; R <= range.e.r; ++R) {
+                    for (let C = range.s.c; C <= range.e.c; ++C) {
+                        const cell_address = { c: C, r: R };
+                        const cell_ref = XLSX.utils.encode_cell(cell_address);
+                        if (!worksheet[cell_ref]) continue;
+                    
+                        worksheet[cell_ref].s = {
+                            border: {
+                                top:    { style: "thin", color: { rgb: "000000" } },
+                                bottom: { style: "thin", color: { rgb: "000000" } },
+                                left:   { style: "thin", color: { rgb: "000000" } },
+                                right:  { style: "thin", color: { rgb: "000000" } }
+                            }
+                        };
+                    }
+                }
+
                 
-                link.click();
-                document.body.removeChild(link);
+                // Agregar hoja al libro
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Kilometraje");
+                
+                // Descargar archivo Excel
+                XLSX.writeFile(workbook, "kilometraje_nabep.xlsx");
+
                 
             } catch (error) {
                 console.error('Error al exportar kilometraje:', error);
