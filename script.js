@@ -324,6 +324,28 @@ src="https://unpkg.com/html5-qrcode"
             }
         }
         
+        function calcularConsumo(ltInicial, ltIntermedio, ltFinal) {
+            const ini = convertirANumerico(ltInicial);
+            const mid = convertirANumerico(ltIntermedio);
+            const fin = convertirANumerico(ltFinal);
+                
+            // Si el final está FULL, no se calcula consumo
+            if (fin === 70) return 0;
+                
+            // Si el inicial está FULL, consumo es desde inicio hasta final
+            if (ini === 70) {
+                return 70 - fin;
+            }
+        
+            // Si el intermedio está FULL, consumo es desde mediodía hasta final
+            if (mid === 70) {
+                return 70 - fin;
+            }
+        
+            // Si ninguno está FULL, no se puede calcular consumo
+            return 0;
+        }
+
         async function registrarKilometraje() {
             // Obtener valores de los campos
             const idEquipo = document.getElementById('equipo').value;
@@ -366,10 +388,12 @@ src="https://unpkg.com/html5-qrcode"
             const kmFinalVal = convertirANumerico(kmFinal);
             const tasaVal = convertirANumerico(tasa);
             const totalUsdVal = convertirANumerico(litros);
-            const ltsInicialVal = ltInicial;
-            const ltsIntermedioVal = ltIntermedio;
-            const ltsFinalVal = ltFinal;
+            const ltsInicialVal = convertirANumerico(ltInicial);
+            const ltsIntermedioVal = convertirANumerico(ltIntermedio);
+            const ltsFinalVal = convertirANumerico(ltFinal);
             const totalBsdVal = totalUsdVal * tasaVal;
+            const consumoVal = calcularConsumo(ltInicial, ltIntermedio, ltFinal);
+
             
             // Obtener fecha y hora actual
             const ahora = new Date();
@@ -394,7 +418,8 @@ src="https://unpkg.com/html5-qrcode"
                             total_combustible_bsd: totalBsdVal,
                             litros_inicial: ltsInicialVal,
                             litros_intermedio: ltsIntermedioVal,
-                            litros_final: ltsFinalVal
+                            litros_final: ltsFinalVal,
+                            consumo: consumoVal
                         }
                     ])
                     .select();
@@ -470,6 +495,7 @@ src="https://unpkg.com/html5-qrcode"
                         'Litros Inicial': r.litros_inicial || 0,
                         'Litros Intermedio': r.litros_intermedio || 0,
                         'Litros Final': r.litros_final || 0,
+                        'Consumo': r.consumo || 0,
                         'Nombre': usuario.nombre || '',
                         'Apellido': usuario.apellido || '',
                         'Fecha': r.fecha || '',
