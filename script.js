@@ -341,7 +341,6 @@ src="https://unpkg.com/html5-qrcode"
             if (mid === 70) {
                 return 70 - fin;
             }
-        
             // Si ninguno está FULL, no se puede calcular consumo
             return 0;
         }
@@ -458,31 +457,21 @@ src="https://unpkg.com/html5-qrcode"
 
         async function exportarKilometraje() {
             try {
-                // Obtener datos de registros
                 const { data: registros, error: errorRegistros } = await supabase
                     .from('registro_kilometraje')
                     .select('*');
-                
-                if (errorRegistros) {
-                    throw errorRegistros;
-                }
-                
-                // Obtener datos de usuarios
+                if (errorRegistros) throw errorRegistros;
+            
                 const { data: usuarios, error: errorUsuarios } = await supabase
                     .from('usuario')
                     .select('id_usuario, nombre, apellido');
-                
-                if (errorUsuarios) {
-                    throw errorUsuarios;
-                }
-                
-                // Crear diccionario de usuarios para búsqueda rápida
+                if (errorUsuarios) throw errorUsuarios;
+            
                 const usuariosDict = {};
                 usuarios.forEach(u => {
                     usuariosDict[u.id_usuario] = u;
                 });
-                
-                // Combinar datos
+            
                 const datosCombinados = registros.map(r => {
                     const usuario = usuariosDict[r.id_usuario] || {};
                     return {
@@ -502,49 +491,68 @@ src="https://unpkg.com/html5-qrcode"
                         'Hora': r.hora || ''
                     };
                 });
-                
-                                // Crear libro y hoja de Excel
-                const XLSX = window.XLSX; // Asegúrate de tener la librería cargada en tu HTML
+            
+                const XLSX = window.XLSX;
                 const workbook = XLSX.utils.book_new();
-                const worksheetData = [
-                    Object.keys(datosCombinados[0]),
-                    ...datosCombinados.map(obj => Object.values(obj))
-                ];
-                const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-                
-                // Aplicar bordes negros a cada celda
-                const range = XLSX.utils.decode_range(worksheet['!ref']);
-                for (let R = range.s.r; R <= range.e.r; ++R) {
-                    for (let C = range.s.c; C <= range.e.c; ++C) {
-                        const cell_address = { c: C, r: R };
-                        const cell_ref = XLSX.utils.encode_cell(cell_address);
-                        if (!worksheet[cell_ref]) continue;
-                    
-                        worksheet[cell_ref].s = {
-                            border: {
-                                top:    { style: "thin", color: { rgb: "000000" } },
-                                bottom: { style: "thin", color: { rgb: "000000" } },
-                                left:   { style: "thin", color: { rgb: "000000" } },
-                                right:  { style: "thin", color: { rgb: "000000" } }
-                            }
+            
+                // Función para crear hoja con bordes
+                function crearHojaConBordes(nombreHoja, datos) {
+                    const worksheetData = [
+                        Object.keys(datos[0]),
+                        ...datos.map(obj => Object.values(obj))
+                    ];
+                    const sheet = XLSX.utils.aoa_to_sheet(worksheetData);
+                    const range = XLSX.utils.decode_range(sheet['!ref']);
+                    for (let R = range.s.r; R <= range.e.r; ++R) {
+                        for (let C = range.s.c; C <= range.e.c; ++C) {
+                            const cell_address = { c: C, r: R };
+                            const cell_ref = XLSX.utils.encode_cell(cell_address);
+                            if (!sheet[cell_ref]) continue;
+                            sheet[cell_ref].s = {
+                                border: {
+                                    top: { style: "thin", color: { rgb: "000000" } },
+                                    bottom: { style: "thin", color: { rgb: "000000" } },
+                                    left: { style: "thin", color: { rgb: "000000" } },
+                                    right: { style: "thin", color: { rgb: "000000" } }
+                                }
+                            };
+                        }
+                    }
+                    XLSX.utils.book_append_sheet(workbook, sheet, nombreHoja);
+                }
+            
+                // Hoja 1: Kilometraje completo
+                crearHojaConBordes("Filtrar por Fecha", datosCombinados);
+            
+                // Hoja 2: Totales por Día
+                const agrupados = {};
+                datosCombinados.forEach(r => {
+                    const fecha = r['Fecha'];
+                    if (!agrupados[fecha]) {
+                        agrupados[fecha] = {
+                            'Fecha': fecha,
+                            'Total USD': 0,
+                            'Total BSD': 0,
+                            'Consumo Total': 0
                         };
                     }
-                }
+                    agrupados[fecha]['Total USD'] += r['Combustible USD'];
+                    agrupados[fecha]['Total BSD'] += r['Combustible BSD'];
+                    agrupados[fecha]['Consumo Total'] += r['Consumo'];
+                });
+            
+                const resumen = Object.values(agrupados);
+                crearHojaConBordes("Totales por Día", resumen);
 
-                
-                // Agregar hoja al libro
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Kilometraje");
-                
-                // Descargar archivo Excel
+                // Descargar archivo
                 XLSX.writeFile(workbook, "kilometraje_nabep.xlsx");
-
-                
+            
             } catch (error) {
                 console.error('Error al exportar kilometraje:', error);
                 alert(`Error al exportar: ${error.message}`);
             }
         }
-        
+
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             console.log("Aplicación inicializada correctamente");
