@@ -98,34 +98,30 @@ src="https://unpkg.com/html5-qrcode"
             const usuario = document.getElementById('usuario-login').value;
             const contrasena = document.getElementById('contrasena-login').value;
             const mensajeError = document.getElementById('mensaje-error-login');
-            
-            // Ocultar mensaje de error previo
+                
             mensajeError.style.display = 'none';
-            
-            // Validar campos vacíos
+                
             if (!usuario || !contrasena) {
                 mensajeError.textContent = 'Por favor, complete todos los campos';
                 mensajeError.style.display = 'block';
                 return;
             }
-            
+        
             try {
-                // Consultar usuario en Supabase
+                // Consultar por username o cedula
                 const { data, error } = await supabase
                     .from('usuario')
                     .select('*')
-                    .eq('username', usuario)
+                    .or(`username.eq.${usuario},cedula.eq.${usuario}`)
                     .eq('clave', contrasena);
-                
-                if (error) {
-                    throw error;
-                }
-                
+            
+                if (error) throw error;
+            
                 if (data && data.length > 0) {
                     const userData = data[0];
                     usuarioActual = userData.username;
                     localStorage.setItem('usuarioActual', usuarioActual);
-                    
+                
                     alert(`¡Bienvenido ${userData.nombre} ${userData.apellido}!`);
                     cambiarVista('qrpage');
                 } else {
@@ -135,81 +131,6 @@ src="https://unpkg.com/html5-qrcode"
             } catch (error) {
                 console.error('Error al verificar login:', error);
                 mensajeError.textContent = `Error de conexión: ${error.message}`;
-                mensajeError.style.display = 'block';
-            }
-        }
-        
-        async function registrarUsuario() {
-            const usuario = document.getElementById('usuario-registro').value;
-            const contrasena = document.getElementById('contrasena-registro').value;
-            const nombre = document.getElementById('nombre').value;
-            const apellido = document.getElementById('apellido').value;
-            const cedula = document.getElementById('cedula').value;
-            const mensajeError = document.getElementById('mensaje-error-registro');
-            const mensajeExito = document.getElementById('mensaje-exito-registro');
-            
-            // Ocultar mensajes previos
-            mensajeError.style.display = 'none';
-            mensajeExito.style.display = 'none';
-            
-            // Validar campos vacíos
-            if (!usuario || !contrasena || !nombre || !apellido || !cedula) {
-                mensajeError.textContent = 'Por favor, complete todos los campos';
-                mensajeError.style.display = 'block';
-                return;
-            }
-            
-            // Validar que la cédula sea un número
-            if (isNaN(cedula) || !cedula.trim()) {
-                mensajeError.textContent = 'La cédula debe ser un número válido';
-                mensajeError.style.display = 'block';
-                return;
-            }
-            
-            try {
-                // Insertar nuevo usuario en Supabase
-                const { data, error } = await supabase
-                    .from('usuario')
-                    .insert([
-                        {
-                            username: usuario.trim(),
-                            clave: contrasena.trim(),
-                            nombre: nombre.trim(),
-                            apellido: apellido.trim(),
-                            cedula: parseInt(cedula.trim())
-                        }
-                    ])
-                    .select();
-                
-                if (error) {
-                    // Verificar si es error de duplicado
-                    if (error.code === '23505') {
-                        mensajeError.textContent = 'El nombre de usuario ya existe';
-                    } else {
-                        mensajeError.textContent = `Error al registrar: ${error.message}`;
-                    }
-                    mensajeError.style.display = 'block';
-                    return;
-                }
-                
-                mensajeExito.textContent = `Usuario ${usuario} registrado correctamente`;
-                mensajeExito.style.display = 'block';
-                
-                // Limpiar campos después de registro exitoso
-                document.getElementById('usuario-registro').value = '';
-                document.getElementById('contrasena-registro').value = '';
-                document.getElementById('nombre').value = '';
-                document.getElementById('apellido').value = '';
-                document.getElementById('cedula').value = '';
-                
-                // Redirigir después de 2 segundos
-                setTimeout(() => {
-                    cambiarVista('inicio');
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error al registrar usuario:', error);
-                mensajeError.textContent = `Error al registrar: ${error.message}`;
                 mensajeError.style.display = 'block';
             }
         }
