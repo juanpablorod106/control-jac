@@ -474,6 +474,67 @@ src="https://unpkg.com/html5-qrcode"
             }
         }
 
+        async function guardarKilometraje() {
+            const km = parseInt(document.getElementById('km-mantenimiento').value);
+            const equipoId = document.getElementById('equipo').value; // Asegúrate de tener esta función definida
+            
+                
+            if (isNaN(km) || km <= 0) {
+                alert('Ingrese un kilometraje válido');
+                return;
+            }
+        
+            try {
+                const { data, error } = await supabase
+                .from('mantenimiento')
+                .upsert([{ equipo_id: equipoId, km_mantenimiento: km }], { onConflict: ['equipo_id'] });
+
+                if (error) throw error;
+                
+                mostrarKilometraje(km);
+                alert('Kilometraje de mantenimiento guardado correctamente');
+            } catch (error) {
+                console.error('Error al guardar mantenimiento:', error);
+                alert('Error al guardar el kilometraje');
+            }
+        }
+
+        function mostrarKilometraje(kmActual) {
+            const kmProximo = kmActual + 5000;
+            document.getElementById('label-km-actual').textContent = kmActual;
+            document.getElementById('label-km-proximo').textContent = kmProximo;
+        }
+
+        async function cargarKilometraje() {
+            const equipoId = localStorage.getItem('equipoActualId');
+
+            if (!equipoId) {
+                console.warn('No hay equipo asignado al usuario');
+                mostrarKilometraje(0);
+                return;
+            }
+        
+            try {
+                const { data, error } = await supabase
+                    .from('mantenimiento')
+                    .select('km_mantenimiento')
+                    .eq('equipo_id', equipoId)
+                    .single();
+            
+                if (error || !data) {
+                    console.warn('No se encontró mantenimiento registrado');
+                    mostrarKilometraje(0);
+                    return;
+                }
+            
+                mostrarKilometraje(data.km_mantenimiento);
+            } catch (error) {
+                console.error('Error al cargar mantenimiento:', error);
+                mostrarKilometraje(0);
+            }
+        }
+
+
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
             console.log("Aplicación inicializada correctamente");
