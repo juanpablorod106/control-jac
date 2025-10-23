@@ -201,8 +201,10 @@
             </div>
 
             <div class="form-group">
+                <h3 class="seccion-titulo">Mantenimiento</h3>
                 <label for="km-mantenimiento">Kilometraje de mantenimiento:</label>
                 <input class="campo" id="km-mantenimiento" placeholder="Ej. 181000" />
+                <button class="campo" onclick="mostrarMantenimientoPorEquipo()">Ver mantenimiento actual</button>
                 <button class="campo" onclick="guardarKilometraje()">Guardar mantenimiento</button>
                 <!-- Labels para mostrar valores -->
                 <p class="campo">🛠️ Último mantenimiento: <span id="label-km-actual">--</span> km</p>

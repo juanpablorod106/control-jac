@@ -476,21 +476,20 @@ src="https://unpkg.com/html5-qrcode"
 
         async function guardarKilometraje() {
             const km = parseInt(document.getElementById('km-mantenimiento').value);
-            const equipoId = document.getElementById('equipo').value; // Asegúrate de tener esta función definida
-            
-                
-            if (isNaN(km) || km <= 0) {
-                alert('Ingrese un kilometraje válido');
+            const equipoId = document.getElementById('equipo').value;
+        
+            if (isNaN(km) || km <= 0 || !equipoId) {
+                alert('Ingrese un kilometraje válido y seleccione un equipo');
                 return;
             }
         
             try {
                 const { data, error } = await supabase
-                .from('mantenimiento')
-                .upsert([{ equipo_id: equipoId, km_mantenimiento: km }], { onConflict: ['equipo_id'] });
-
+                    .from('mantenimiento')
+                    .upsert([{ equipo_id: equipoId, km_mantenimiento: km }], { onConflict: ['equipo_id'] });
+            
                 if (error) throw error;
-                
+            
                 mostrarKilometraje(km);
                 alert('Kilometraje de mantenimiento guardado correctamente');
             } catch (error) {
@@ -499,17 +498,17 @@ src="https://unpkg.com/html5-qrcode"
             }
         }
 
+
         function mostrarKilometraje(kmActual) {
             const kmProximo = kmActual + 5000;
             document.getElementById('label-km-actual').textContent = kmActual;
             document.getElementById('label-km-proximo').textContent = kmProximo;
         }
 
-        async function cargarKilometraje() {
-            const equipoId = localStorage.getItem('equipoActualId');
-
+        async function cargarKilometrajePorEquipo() {
+            const equipoId = document.getElementById('equipo').value;
+                
             if (!equipoId) {
-                console.warn('No hay equipo asignado al usuario');
                 mostrarKilometraje(0);
                 return;
             }
@@ -519,21 +518,55 @@ src="https://unpkg.com/html5-qrcode"
                     .from('mantenimiento')
                     .select('km_mantenimiento')
                     .eq('equipo_id', equipoId)
-                    .single();
+                    .order('fecha', { ascending: false })
+                    .limit(1);
             
-                if (error || !data) {
-                    console.warn('No se encontró mantenimiento registrado');
+                if (error || !data || data.length === 0) {
                     mostrarKilometraje(0);
                     return;
                 }
             
-                mostrarKilometraje(data.km_mantenimiento);
+                mostrarKilometraje(data[0].km_mantenimiento);
             } catch (error) {
                 console.error('Error al cargar mantenimiento:', error);
                 mostrarKilometraje(0);
             }
         }
 
+        async function mostrarMantenimientoPorEquipo() {
+            const equipoId = document.getElementById('equipo').value;
+                
+            if (!equipoId) {
+                document.getElementById('label-km-actual').textContent = '--';
+                document.getElementById('label-km-proximo').textContent = '--';
+                return;
+            }
+        
+            try {
+                const { data, error } = await supabase
+                    .from('mantenimiento')
+                    .select('km_mantenimiento')
+                    .eq('equipo_id', equipoId)
+                    .order('fecha', { ascending: false })
+                    .limit(1);
+            
+                if (error || !data || data.length === 0) {
+                    document.getElementById('label-km-actual').textContent = '--';
+                    document.getElementById('label-km-proximo').textContent = '--';
+                    return;
+                }
+            
+                const kmActual = data[0].km_mantenimiento;
+                const kmProximo = kmActual + 5000;
+            
+                document.getElementById('label-km-actual').textContent = kmActual;
+                document.getElementById('label-km-proximo').textContent = kmProximo;
+            } catch (error) {
+                console.error('Error al consultar mantenimiento:', error);
+                document.getElementById('label-km-actual').textContent = '--';
+                document.getElementById('label-km-proximo').textContent = '--';
+            }
+        }
 
         // Inicialización
         document.addEventListener('DOMContentLoaded', function() {
