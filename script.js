@@ -1,7 +1,8 @@
 src="https://unpkg.com/html5-qrcode"
+// GoabayfuB3kr5sNh
 // Configuración de Supabase
-        const supabaseUrl = 'https://rpvnrwldekdzlzwkerlx.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJwdm5yd2xkZWtkemx6d2tlcmx4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTcxMjA0ODcsImV4cCI6MjA3MjY5NjQ4N30.ByDuXBxKnCSeIn-1Bo4dap-sEjkdN61GQTVx9Vnl_yM';
+        const supabaseUrl = 'https://fwbbnfpdgyrgdsnljdij.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3YmJuZnBkZ3lyZ2RzbmxqZGlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NjYwODYsImV4cCI6MjA3OTU0MjA4Nn0.pcCONll57HBFyZPuVgC-Vx4_G5q3b5QXFKtHWwWdn6o';
         
         // Inicializar Supabase
         const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
