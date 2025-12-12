@@ -247,25 +247,38 @@ src="https://unpkg.com/html5-qrcode"
         }
         
         function calcularConsumo(ltInicial, ltIntermedio, ltFinal) {
-            const ini = convertirANumerico(ltInicial);
-            const mid = convertirANumerico(ltIntermedio);
-            const fin = convertirANumerico(ltFinal);
-                
-            // Si el final está FULL, no se calcula consumo
-            if (fin === 80) return 0;
-                
-            // Si el inicial está FULL, consumo es desde inicio hasta final
-            if (ini === 80) {
-                return 80 - fin;
-            }
-        
-            // Si el intermedio está FULL, consumo es desde mediodía hasta final
-            if (mid === 80) {
-                return 80 - fin;
-            }
-            // Si ninguno está FULL, no se puede calcular consumo
-            return 0;
-        }
+    const ini = convertirANumerico(ltInicial);     // ej: 40
+    const mid = convertirANumerico(ltIntermedio);  // ej: 80
+    const fin = convertirANumerico(ltFinal);       // ej: 70
+
+    // Caso 1: Terminó FULL → no podemos saber exactamente cuánto consumió
+    if (fin === 80) {
+        // Si empezó o llegó a full en algún momento del día → consumió todo lo que no quedó
+        if (ini === 80) return 80 - fin;  // empezó full → consumo simple
+        if (mid === 80) return 80 - fin;  // cargó full a mitad → consumo de la tarde
+        return 0; // terminó full pero nunca estuvo full antes → no se puede saber (raro)
+    }
+
+    // Caso 2: Hubo recarga visible (el tanque subió durante el día)
+    if (mid > ini + 3) {  // tolerancia de 3 litros para evitar errores de redondeo
+        const litrosCargadosEstimados = mid - ini;
+        const variacionNeta = fin - ini;
+        const consumo = litrosCargadosEstimados - variacionNeta;
+        return Math.max(0, consumo);  // ¡Esta es la fórmula mágica!
+    }
+
+    // Caso 3: No hubo recarga visible, pero alguno estaba full
+    if (ini === 80) return 80 - fin;
+    if (mid === 80) return 80 - fin;
+
+    // Caso 4: Solo bajó el tanque → el consumo es al menos esa bajada
+    if (fin < ini) {
+        return ini - fin;
+    }
+
+    // Caso 5: Quedó igual o más alto sin recarga visible → consumo 0 (probablemente no usó el equipo)
+    return 0;
+}
 
         async function registrarKilometraje() {
             // Obtener valores de los campos
