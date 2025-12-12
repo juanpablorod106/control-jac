@@ -252,16 +252,16 @@ src="https://unpkg.com/html5-qrcode"
             const fin = convertirANumerico(ltFinal);
                 
             // Si el final está FULL, no se calcula consumo
-            if (fin === 70) return 0;
+            if (fin === 80) return 0;
                 
             // Si el inicial está FULL, consumo es desde inicio hasta final
-            if (ini === 70) {
-                return 70 - fin;
+            if (ini === 80) {
+                return 80 - fin;
             }
         
             // Si el intermedio está FULL, consumo es desde mediodía hasta final
-            if (mid === 70) {
-                return 70 - fin;
+            if (mid === 80) {
+                return 80 - fin;
             }
             // Si ninguno está FULL, no se puede calcular consumo
             return 0;
