@@ -312,6 +312,7 @@ src="https://unpkg.com/html5-qrcode"
             const ltsInicialVal = convertirANumerico(ltInicial);
             const ltsIntermedioVal = convertirANumerico(ltIntermedio);
             const ltsFinalVal = convertirANumerico(ltFinal);
+            const litrosIngresadosVal = convertirANumerico(document.getElementById('litros_ingresados').value);
             const totalBsdVal = totalUsdVal * tasaVal;
             const consumoVal = calcularConsumo(ltInicial, ltIntermedio, ltFinal);
 
@@ -340,6 +341,7 @@ src="https://unpkg.com/html5-qrcode"
                             litros_inicial: ltsInicialVal,
                             litros_intermedio: ltsIntermedioVal,
                             litros_final: ltsFinalVal,
+                            litros_ingresados: litrosIngresadosVal,
                             consumo: consumoVal
                         }
                     ])
@@ -453,102 +455,102 @@ src="https://unpkg.com/html5-qrcode"
     }
 
         async function exportarKilometraje() {
-            try {
-                const { data: registros, error: errorRegistros } = await supabase
-                    .from('registro_kilometraje')
-                    .select('*');
-                if (errorRegistros) throw errorRegistros;
-            
-                const { data: usuarios, error: errorUsuarios } = await supabase
-                    .from('usuario')
-                    .select('id_usuario, nombre, apellido');
-                if (errorUsuarios) throw errorUsuarios;
-            
-                const usuariosDict = {};
-                usuarios.forEach(u => {
-                    usuariosDict[u.id_usuario] = u;
-                });
-            
-                const datosCombinados = registros.map(r => {
-                    const usuario = usuariosDict[r.id_usuario] || {};
-                    return {
-                        'ID Equipo': r.id_equipo,
-                        'Combustible USD': r.total_combustible_usd || 0,
-                        'Combustible BSD': r.total_combustible_bsd || 0,
-                        'KM Inicial': r.km_inicial || 0,
-                        'KM Intermedio': r.km_intermedio || 0,
-                        'KM Final': r.km_final || 0,
-                        'Litros Inicial': r.litros_inicial || 0,
-                        'Litros Intermedio': r.litros_intermedio || 0,
-                        'Litros Final': r.litros_final || 0,
-                        'Consumo': r.consumo || 0,
-                        'Nombre': usuario.nombre || '',
-                        'Apellido': usuario.apellido || '',
-                        'Fecha': r.fecha || '',
-                        'Hora': r.hora || ''
-                    };
-                });
-            
-                const XLSX = window.XLSX;
-                const workbook = XLSX.utils.book_new();
-            
-                // Función para crear hoja con bordes
-                function crearHojaConBordes(nombreHoja, datos) {
-                    const worksheetData = [
-                        Object.keys(datos[0]),
-                        ...datos.map(obj => Object.values(obj))
-                    ];
-                    const sheet = XLSX.utils.aoa_to_sheet(worksheetData);
-                    const range = XLSX.utils.decode_range(sheet['!ref']);
-                    for (let R = range.s.r; R <= range.e.r; ++R) {
-                        for (let C = range.s.c; C <= range.e.c; ++C) {
-                            const cell_address = { c: C, r: R };
-                            const cell_ref = XLSX.utils.encode_cell(cell_address);
-                            if (!sheet[cell_ref]) continue;
-                            sheet[cell_ref].s = {
-                                border: {
-                                    top: { style: "thin", color: { rgb: "000000" } },
-                                    bottom: { style: "thin", color: { rgb: "000000" } },
-                                    left: { style: "thin", color: { rgb: "000000" } },
-                                    right: { style: "thin", color: { rgb: "000000" } }
-                                }
-                            };
-                        }
-                    }
-                    XLSX.utils.book_append_sheet(workbook, sheet, nombreHoja);
-                }
-            
-                // Hoja 1: Kilometraje completo
-                crearHojaConBordes("Filtrar por Fecha", datosCombinados);
-            
-                // Hoja 2: Totales por Día
-                const agrupados = {};
-                datosCombinados.forEach(r => {
-                    const fecha = r['Fecha'];
-                    if (!agrupados[fecha]) {
-                        agrupados[fecha] = {
-                            'Fecha': fecha,
-                            'Total USD': 0,
-                            'Total BSD': 0,
-                            'Consumo Total': 0
-                        };
-                    }
-                    agrupados[fecha]['Total USD'] += r['Combustible USD'];
-                    agrupados[fecha]['Total BSD'] += r['Combustible BSD'];
-                    agrupados[fecha]['Consumo Total'] += r['Consumo'];
-                });
-            
-                const resumen = Object.values(agrupados);
-                crearHojaConBordes("Totales por Día", resumen);
+    try {
+        const { data: registros, error: errorRegistros } = await supabase
+            .from('registro_kilometraje')
+            .select('*');
+        if (errorRegistros) throw errorRegistros;
 
-                // Descargar archivo
-                XLSX.writeFile(workbook, "kilometraje_nabep.xlsx");
-            
-            } catch (error) {
-                console.error('Error al exportar kilometraje:', error);
-                alert(`Error al exportar: ${error.message}`);
+        const { data: usuarios, error: errorUsuarios } = await supabase
+            .from('usuario')
+            .select('id_usuario, nombre, apellido');
+        if (errorUsuarios) throw errorUsuarios;
+
+        const usuariosDict = {};
+        usuarios.forEach(u => usuariosDict[u.id_usuario] = u);
+
+        // === DATOS PRINCIPALES CON LITROS INGRESADOS AL LADO DE LOS MONTOS ===
+        const datosCombinados = registros.map(r => {
+            const usuario = usuariosDict[r.id_usuario] || {};
+            return {
+                'ID Equipo'         : r.id_equipo || '',
+                'Conductor'         : `${usuario.nombre || ''} ${usuario.apellido || ''}`.trim() || 'Sin nombre',
+                'Fecha'             : r.fecha || '',
+                'Hora'              : r.hora || '',
+                'KM Inicial'        : r.km_inicial || 0,
+                'KM Intermedio'     : r.km_intermedio || 0,
+                'KM Final'          : r.km_final || 0,
+                'Litros Inicial'    : r.litros_inicial || 0,
+                'Litros Intermedio' : r.litros_intermedio || 0,
+                'Litros Final'      : r.litros_final || 0,
+                'Combustible USD'   : Number(r.total_combustible_usd || 0).toFixed(2),
+                'Litros Ingresados' : Number(r.litros_ingresados || 0).toFixed(2),  // ← AQUÍ ESTÁ, AL LADO
+                'Combustible BSD'   : Number(r.total_combustible_bsd || 0).toFixed(2),
+                'Consumo Real (L)'  : Number(r.consumo || 0).toFixed(2)
+            };
+        });
+
+        const XLSX = window.XLSX;
+        const workbook = XLSX.utils.book_new();
+
+        // Función para crear hojas con bordes (tu original, intacta)
+        function crearHojaConBordes(nombreHoja, datos) {
+            if (datos.length === 0) return;
+            const worksheetData = [Object.keys(datos[0]), ...datos.map(obj => Object.values(obj))];
+            const sheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            const range = XLSX.utils.decode_range(sheet['!ref']);
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_ref = XLSX.utils.encode_cell({ c: C, r: R });
+                    if (!sheet[cell_ref]) continue;
+                    sheet[cell_ref].s = {
+                        border: {
+                            top:    { style: "thin", color: { rgb: "000000" } },
+                            bottom: { style: "thin", color: { rgb: "000000" } },
+                            left:   { style: "thin", color: { rgb: "000000" } },
+                            right:  { style: "thin", color: { rgb: "000000" } }
+                        }
+                    };
+                }
             }
+            XLSX.utils.book_append_sheet(workbook, sheet, nombreHoja);
         }
+
+        // Hoja 1: Todos los registros
+        crearHojaConBordes("Registros Completos", datosCombinados);
+
+        // Hoja 2: Resumen por día (también incluye litros ingresados)
+        const resumenPorDia = {};
+        datosCombinados.forEach(r => {
+            const fecha = r['Fecha'];
+            if (!resumenPorDia[fecha]) {
+                resumenPorDia[fecha] = {
+                    'Fecha'            : fecha,
+                    'Total USD'        : 0,
+                    'Total Litros Ingresados': 0,
+                    'Total BSD'        : 0,
+                    'Consumo Total (L)': 0
+                };
+            }
+            resumenPorDia[fecha]['Total USD'] += parseFloat(r['Combustible USD']);
+            resumenPorDia[fecha]['Total Litros Ingresados'] += parseFloat(r['Litros Ingresados']);
+            resumenPorDia[fecha]['Total BSD'] += parseFloat(r['Combustible BSD']);
+            resumenPorDia[fecha]['Consumo Total (L)'] += parseFloat(r['Consumo Real (L)']);
+        });
+
+        const hojaResumen = Object.values(resumenPorDia);
+        crearHojaConBordes("Resumen por Día", hojaResumen);
+
+        // Descargar
+        XLSX.writeFile(workbook, "control_combustible_nabep.xlsx");
+
+        alert("Excel generado correctamente con Litros Ingresados");
+
+    } catch (error) {
+        console.error('Error al exportar:', error);
+        alert(`Error al exportar: ${error.message}`);
+    }
+}
 
         async function guardarKilometraje() {
             const km = parseInt(document.getElementById('km-mantenimiento').value);
