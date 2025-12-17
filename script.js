@@ -1,14 +1,43 @@
+// Evitar ejecución duplicada
+if (window.appInitialized) {
+    console.warn('El script ya fue inicializado');
+} else {
+    window.appInitialized = true;
+
 const supabaseUrl = 'https://fwbbnfpdgyrgdsnljdij.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ3YmJuZnBkZ3lyZ2RzbmxqZGlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM5NjYwODYsImV4cCI6MjA3OTU0MjA4Nn0.pcCONll57HBFyZPuVgC-Vx4_G5q3b5QXFKtHWwWdn6o';
 
-// Inicializar Supabase
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+// Inicializar Supabase (evitar declaración duplicada)
+function inicializarSupabase() {
+    if (typeof window.supabase === 'undefined') {
+        console.warn('La biblioteca de Supabase aún no está cargada, reintentando...');
+        setTimeout(inicializarSupabase, 100);
+        return;
+    }
+    if (!window.supabaseClient) {
+        window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        console.log('Supabase inicializado correctamente');
+    }
+}
+
+// Función helper para obtener la instancia de supabase
+function getSupabase() {
+    if (!window.supabaseClient) {
+        inicializarSupabase();
+    }
+    return window.supabaseClient;
+}
+
+// Intentar inicializar inmediatamente si la biblioteca ya está cargada
+if (typeof window.supabase !== 'undefined') {
+    inicializarSupabase();
+}
 
 // Variables globales
 let usuarioActual = null;
 
 // Función para alternar modo oscuro
-function alternarModoOscuro() {
+window.alternarModoOscuro = function alternarModoOscuro() {
     const body = document.body;
     const interruptor = document.getElementById('interruptor-modo');
     const interruptorSecundario = document.getElementById('interruptor-modo-secundario');
@@ -50,7 +79,7 @@ function verificarPreferenciaModo() {
 }
 
 // Funciones de navegación
-function cambiarVista(vista) {
+window.cambiarVista = function cambiarVista(vista) {
     console.log("Cambiando a vista:", vista);
     
     // Ocultar todas las vistas
@@ -100,7 +129,7 @@ function cambiarVista(vista) {
 }
 
 // Funciones de la aplicación con conexión a Supabase
-async function verificarLogin() {
+window.verificarLogin = async function verificarLogin() {
     const usuario = document.getElementById('usuario-login').value;
     const contrasena = document.getElementById('contrasena-login').value;
     const mensajeError = document.getElementById('mensaje-error-login');
@@ -119,6 +148,7 @@ async function verificarLogin() {
 
     try {
         // Consultar por username o cedula
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('usuario')
             .select('*')
@@ -161,6 +191,7 @@ async function buscarEquipo() {
     
     try {
         // Consultar equipo en Supabase
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('equipo')
             .select('id_equipo, modelo, placa')
@@ -188,7 +219,7 @@ async function buscarEquipo() {
     }
 }
 
-async function iniciarEscaneo() {
+window.iniciarEscaneo = async function iniciarEscaneo() {
     if (!window.Html5Qrcode) {
         alert('La biblioteca de escaneo QR no está cargada');
         return;
@@ -218,6 +249,7 @@ async function iniciarEscaneo() {
 
 async function obtenerIdUsuarioPorUsername(username) {
     try {
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('usuario')
             .select('id_usuario')
@@ -285,7 +317,7 @@ function calcularConsumo(ltInicial, ltIntermedio, ltFinal) {
     return 0;
 }
 
-async function registrarKilometraje() {
+window.registrarKilometraje = async function registrarKilometraje() {
     // Obtener valores de los campos
     const idEquipo = document.getElementById('equipo').value;
     const tasa = document.getElementById('tasa').value;
@@ -345,6 +377,7 @@ async function registrarKilometraje() {
     
     try {
         // Insertar registro en Supabase
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('registro_kilometraje')
             .insert([
@@ -399,11 +432,11 @@ async function registrarKilometraje() {
     }
 }
 
-function salir_form() {
+window.salir_form = function salir_form() {
     cambiarVista('inicio_de_sesion');
 }
 
-async function registrarUsuario() {
+window.registrarUsuario = async function registrarUsuario() {
     const usuario = document.getElementById('usuario-registro').value;
     const contrasena = document.getElementById('contrasena-registro').value;
     const nombre = document.getElementById('nombre').value;
@@ -436,6 +469,7 @@ async function registrarUsuario() {
     
     try {
         // Insertar nuevo usuario en Supabase
+        const supabase = getSupabase();
         const { data, error } = await supabase
             .from('usuario')
             .insert([
@@ -491,8 +525,9 @@ async function registrarUsuario() {
     }
 }
 
-async function exportarKilometraje() {
+window.exportarKilometraje = async function exportarKilometraje() {
     try {
+        const supabase = getSupabase();
         const { data: registros, error: errorRegistros } = await supabase
             .from('registro_kilometraje')
             .select('*');
@@ -594,9 +629,88 @@ async function exportarKilometraje() {
     }
 }
 
+// Funciones de mantenimiento
+window.mostrarMantenimientoPorEquipo = async function mostrarMantenimientoPorEquipo() {
+    const idEquipo = document.getElementById('equipo').value.trim();
+    if (!idEquipo) {
+        alert('Por favor ingrese un ID de equipo primero');
+        return;
+    }
+    
+    try {
+        const supabase = getSupabase();
+        const { data, error } = await supabase
+            .from('mantenimiento')
+            .select('*')
+            .eq('id_equipo', idEquipo)
+            .order('fecha', { ascending: false })
+            .limit(1);
+        
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+            const mantenimiento = data[0];
+            document.getElementById('label-km-actual').textContent = mantenimiento.kilometraje || '--';
+            const proximoKm = (mantenimiento.kilometraje || 0) + 5000; // Asumiendo mantenimiento cada 5000 km
+            document.getElementById('label-km-proximo').textContent = proximoKm;
+        } else {
+            document.getElementById('label-km-actual').textContent = 'Sin registro';
+            document.getElementById('label-km-proximo').textContent = '--';
+        }
+    } catch (error) {
+        console.error('Error al obtener mantenimiento:', error);
+        alert(`Error: ${error.message}`);
+    }
+};
+
+window.guardarKilometraje = async function guardarKilometraje() {
+    const idEquipo = document.getElementById('equipo').value.trim();
+    const kmMantenimiento = document.getElementById('km-mantenimiento').value.trim();
+    
+    if (!idEquipo) {
+        alert('Por favor ingrese un ID de equipo primero');
+        return;
+    }
+    
+    if (!kmMantenimiento || isNaN(kmMantenimiento)) {
+        alert('Por favor ingrese un kilometraje válido');
+        return;
+    }
+    
+    try {
+        const supabase = getSupabase();
+        const ahora = new Date();
+        const fecha = ahora.toISOString().split('T')[0];
+        
+        const { data, error } = await supabase
+            .from('mantenimiento')
+            .insert([
+                {
+                    id_equipo: idEquipo,
+                    fecha: fecha,
+                    kilometraje: parseFloat(kmMantenimiento)
+                }
+            ])
+            .select();
+        
+        if (error) throw error;
+        
+        alert('Mantenimiento guardado correctamente');
+        document.getElementById('km-mantenimiento').value = '';
+        mostrarMantenimientoPorEquipo(); // Actualizar la vista
+    } catch (error) {
+        console.error('Error al guardar mantenimiento:', error);
+        alert(`Error: ${error.message}`);
+    }
+};
+
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
     console.log("Aplicación inicializada correctamente");
+    
+    // Inicializar Supabase cuando el DOM esté listo
+    inicializarSupabase();
+    
     verificarPreferenciaModo();
     
     // Verificar si hay un usuario en localStorage
@@ -605,3 +719,5 @@ document.addEventListener('DOMContentLoaded', function() {
         usuarioActual = usuarioGuardado;
     }
 });
+
+} // Cierre del bloque if (window.appInitialized)
