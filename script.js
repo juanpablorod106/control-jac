@@ -179,8 +179,9 @@ window.verificarLogin = async function verificarLogin() {
     }
 }
 
-async function buscarEquipo() {
-    const idEquipo = document.getElementById('equipo').value.trim();
+async function buscarEquipo(idEquipoArgument) {
+    // Permitir pasar el idEquipo directamente (por defecto toma el del input)
+    const idEquipo = (typeof idEquipoArgument === 'string' ? idEquipoArgument : document.getElementById('equipo').value.trim());
     const modelo = document.getElementById('modelo');
     const placa = document.getElementById('placa');
     
@@ -219,6 +220,55 @@ async function buscarEquipo() {
     }
 }
 
+// Nueva función para escanear QR desde la galería y buscar equipo
+window.escanearQREnGaleria = async function escanearQREnGaleria() {
+    // Crear input de tipo file (solo una vez)
+    let inputFile = document.getElementById('input-qr-galeria');
+    if (!inputFile) {
+        inputFile = document.createElement('input');
+        inputFile.type = 'file';
+        inputFile.accept = 'image/*';
+        inputFile.id = 'input-qr-galeria';
+        inputFile.style.display = 'none';
+        document.body.appendChild(inputFile);
+    }
+
+    inputFile.onchange = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // Usar Html5Qrcode para decodificar la imagen con QR
+        if (!window.Html5Qrcode) {
+            alert('La biblioteca de escaneo QR no está cargada');
+            return;
+        }
+        const html5QrCode = new Html5Qrcode(/* element id not needed for file scan */ "qr-reader");
+        try {
+            const decodedText = await html5QrCode.scanFile(file, true);
+            document.getElementById('equipo').value = decodedText;
+            await buscarEquipo(decodedText);
+        } catch (err) {
+            alert('No se pudo leer el QR de la imagen seleccionada');
+            console.error('QR Scan from gallery error:', err);
+        } finally {
+            // Limpiar input para futuros usos
+            inputFile.value = '';
+        }
+    };
+
+    // Abrir galería
+    inputFile.click();
+};
+
+document.getElementById('input-qr-galeria').addEventListener('change', function(event) {
+    if (typeof escanearQREnGaleria === "function") {
+        escanearQREnGaleria(event);
+    } else {
+        alert("La función de escaneo QR desde galería no está disponible.");
+    }
+});
+
+// Escanear QR desde la cámara
 window.iniciarEscaneo = async function iniciarEscaneo() {
     if (!window.Html5Qrcode) {
         alert('La biblioteca de escaneo QR no está cargada');
@@ -719,5 +769,98 @@ document.addEventListener('DOMContentLoaded', function() {
         usuarioActual = usuarioGuardado;
     }
 });
+
+// --- Persistir datos de la interfaz de recorrido en localStorage ---
+
+// Lista de IDs de campos del formulario de recorrido
+const camposRecorrido = [
+    'tasa',
+    'litros',
+    'litros_ingresados',
+    'km-inicial',
+    'km-intermedio',
+    'km-final',
+    'lt-inicial',
+    'lt-intermedio',
+    'lt-final'
+];
+
+// Prefijo clave localStorage
+const PREFIJO_LOCAL = 'nabep_recorrido_';
+
+// Guardar campos al escribir
+function guardarCampoRecorrido(e) {
+    const campo = e.target;
+    if (camposRecorrido.includes(campo.id)) {
+        localStorage.setItem(PREFIJO_LOCAL + campo.id, campo.value);
+    }
+}
+
+// Cargar los campos desde localStorage al iniciar
+function cargarCamposRecorrido() {
+    camposRecorrido.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            const valor = localStorage.getItem(PREFIJO_LOCAL + id);
+            if (valor !== null) {
+                el.value = valor;
+            }
+        }
+    });
+}
+
+// Asignar handlers automáticamente cuando la vista de recorrido se muestra
+function instalarPersistenciaRecorrido() {
+    camposRecorrido.forEach(id => {
+        const campo = document.getElementById(id);
+        if (campo) {
+            // Input para selects y text, ambos poseen 'input' event excepto select que mejor es 'change'
+            campo.removeEventListener('input', guardarCampoRecorrido);
+            campo.removeEventListener('change', guardarCampoRecorrido);
+            if (campo.tagName.toLowerCase() === 'select') {
+                campo.addEventListener('change', guardarCampoRecorrido);
+            } else {
+                campo.addEventListener('input', guardarCampoRecorrido);
+            }
+        }
+    });
+}
+
+// Limpiar los campos guardados (puedes llamar esta función al enviar el formulario exitosamente si lo deseas)
+window.limpiarCamposRecorridoLocalStorage = function limpiarCamposRecorridoLocalStorage() {
+    camposRecorrido.forEach(id => {
+        localStorage.removeItem(PREFIJO_LOCAL + id);
+    });
+}
+
+// Monitorizar cuando se muestra la vista de recorrido e instalar persistencia/cargar valores
+function observarVistaRecorrido() {
+    const qrpage = document.getElementById('vista-qrpage');
+    if (qrpage) {
+        const observer = new MutationObserver(() => {
+            if (qrpage.style.display !== 'none') {
+                // Cargar y conectar handlers sólo si visible
+                cargarCamposRecorrido();
+                instalarPersistenciaRecorrido();
+            }
+        });
+        observer.observe(qrpage, { attributes: true, attributeFilter: ['style'] });
+    }
+}
+
+// Activar la observación al iniciar la app
+document.addEventListener('DOMContentLoaded', function() {
+    observarVistaRecorrido();
+    // Si la vista ya está visible al cargar, cargar datos
+    const qrpage = document.getElementById('vista-qrpage');
+    if (qrpage && qrpage.style.display !== 'none') {
+        cargarCamposRecorrido();
+        instalarPersistenciaRecorrido();
+    }
+});
+
+// Recomendación: llama a window.limpiarCamposRecorridoLocalStorage() después de guardar recorrido exitosamente.
+
+
 
 } // Cierre del bloque if (window.appInitialized)
